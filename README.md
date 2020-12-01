@@ -8,7 +8,7 @@ Based on: https://github.com/Maximvdw/SpigotSite/
 
 ## Get user information by name
 
-* URL: http://api.groupez.xyz/?name=Maxlego08
+* URL: http://api.groupez.xyz/search/users?name=Maxlego08
 * Resonse:
 ```json
 {
