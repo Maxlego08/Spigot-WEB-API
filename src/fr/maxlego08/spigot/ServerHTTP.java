@@ -3,6 +3,7 @@ package fr.maxlego08.spigot;
 import java.io.IOException;
 
 import fr.maxlego08.spigot.controller.HomeController;
+import fr.maxlego08.spigot.controller.SearchUserController;
 
 public class ServerHTTP extends Server{
 
@@ -18,6 +19,7 @@ public class ServerHTTP extends Server{
 	@Override
 	protected void onEnable() {
 		this.register(new HomeController());
+		this.register(new SearchUserController());
 	}
 
 	@Override
