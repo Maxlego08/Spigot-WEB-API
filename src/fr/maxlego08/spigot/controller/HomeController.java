@@ -14,7 +14,7 @@ public class HomeController extends Controller {
 	@Override
 	public void onRequest() throws IOException{
 
-		String response = "Bienvenue sur mon site !";
+		String response = "Spigot API";
 		exchange.sendResponseHeaders(200, response.getBytes().length);
 		exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
 		OutputStream os = exchange.getResponseBody();

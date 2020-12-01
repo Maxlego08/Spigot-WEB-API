@@ -1,13 +1,10 @@
 package fr.maxlego08.spigot;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Modifier;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -40,7 +37,7 @@ public abstract class Server {
 
 		long currentTimeMillis = System.currentTimeMillis();
 
-		onLoad();
+		this.onLoad();
 
 		// Gson
 		gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().serializeNulls()
@@ -48,7 +45,8 @@ public abstract class Server {
 
 		System.out.println(String.format("Chargement du serveur web sur le port %s", port));
 		httpServer = HttpServer.create(new InetSocketAddress(port), 0);
-		// Spigot
+
+		// Chargement de l'API Spigot de façon asynchrome
 		Thread thread = new Thread(() -> {
 			System.out.println("Chargement de l'API spigot...");
 			spigotSiteAPI = new SpigotSiteCore();
@@ -61,32 +59,28 @@ public abstract class Server {
 		});
 		thread.start();
 
-		onEnable();
+		this.onEnable();
 
 		for (Controller controller : this.controllers) {
 			HttpContext context = httpServer.createContext(controller.getUrl());
 			context.setHandler(exchange -> {
+				controller.onPreRequest(gson, spigotSiteAPI, resourceManager, userManager, exchange);
+				
 				if (isEnable())
-					controller.onPreRequest(gson, spigotSiteAPI, resourceManager, userManager, exchange);
-				else {
-					Map<String, String> errors = new HashMap<>();
-					errors.put("error", "Site launch in progress...");
-					String response = gson.toJson(errors);
-					exchange.sendResponseHeaders(400, response.getBytes().length);
-					OutputStream os = exchange.getResponseBody();
-					os.write(response.getBytes());
-					os.close();
-				}
+					controller.onRequest();
+				else
+					controller.handleJsonError(503, "Site launch in progress...");
 			});
 		}
 
 		httpServer.start();
 
+		Server server = this;
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 
 			@Override
 			public void run() {
-				onDisable();
+				server.onDisable();
 				if (httpServer != null)
 					httpServer.stop(0);
 			}

@@ -1,6 +1,7 @@
 package fr.maxlego08.spigot;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,11 +48,6 @@ public abstract class Controller {
 		this.resourceManager = resourceManager;
 		this.userManager = userManager;
 		this.parameters = queryToMap(exchange.getRequestURI().getQuery());
-		try {
-			this.onRequest();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	/**
@@ -126,6 +122,38 @@ public abstract class Controller {
 	 */
 	public String getUrl() {
 		return url;
+	}
+
+	/**
+	 * Return error message
+	 * 
+	 * @param errorCode
+	 * @param error
+	 * @throws IOException
+	 */
+	protected void handleJsonError(int errorCode, String error) throws IOException {
+		Map<String, String> errors = new HashMap<>();
+		errors.put("error", error);
+		String response = gson.toJson(errors);
+		exchange.sendResponseHeaders(errorCode, response.getBytes().length);
+		OutputStream os = exchange.getResponseBody();
+		os.write(response.getBytes());
+		os.close();
+	}
+
+	/**
+	 * Return JSON response
+	 * 
+	 * @param httpCode
+	 * @param object
+	 * @throws IOException
+	 */
+	protected void handleJson(int httpCode, Object object) throws IOException {
+		String response = gson.toJson(object);
+		exchange.sendResponseHeaders(httpCode, response.getBytes().length);
+		OutputStream os = exchange.getResponseBody();
+		os.write(response.getBytes());
+		os.close();
 	}
 
 }
